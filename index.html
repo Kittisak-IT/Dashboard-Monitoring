@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT HUB - Portal</title>
+    <title>IT HUB - Command Center</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,95 +24,91 @@
                 </div>
                 <span class="tech-font text-2xl font-bold tracking-wider text-cyan-400 neon-text-cyan">IT<span class="text-emerald-400">HUB</span></span>
             </div>
-            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 animate-pulse">● LIVE DATABASE</span>
+            
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> SYSTEM LOCAL ACTIVE
+                </span>
+            </div>
         </div>
     </nav>
 
-    <div id="loading-screen" class="grow flex flex-col justify-center items-center gap-3">
-        <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-xs font-mono text-cyan-400 tracking-widest">FETCHING DATA...</p>
-    </div>
-
-    <main id="frontend-panel" class="hidden max-w-7xl w-full mx-auto p-4 md:p-6 grow space-y-6">
-        <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/80">
-            <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-cubes text-emerald-400"></i> ศูนย์รวมลิงก์และระบบบริหารจัดการ
-            </h1>
-            <p class="text-xs text-slate-400 mt-1">ข้อมูลถูกดึงจาก Google Sheets โดยตรงแบบ Real-time หากต้องการเพิ่มหรือแก้ไขลิงก์ ให้แก้ไขในไฟล์สเปรดชีตหลักได้เลยครับ</p>
+    <main id="frontend-panel" class="max-w-7xl w-full mx-auto p-4 md:p-6 grow space-y-6">
+        <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-emerald-400"></i> ศูนย์รวมลิงก์และระบบบริหารจัดการไอที
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">รวบรวมเครื่องมือระบบ IP ภายใน (LAN) และเว็บไซต์ภายนอก (หากต้องการเพิ่ม/แก้ไขลิงก์ สามารถแก้ได้ในโค้ด GitHub ได้โดยตรง)</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <button onclick="filterCategory('All')" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold border border-cyan-400/30 cursor-pointer transition-all filter-btn" id="btn-all">ทั้งหมด</button>
+                <button onclick="filterCategory('Network')" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white cursor-pointer transition-all filter-btn" id="btn-network">Network & Security</button>
+                <button onclick="filterCategory('Server')" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white cursor-pointer transition-all filter-btn" id="btn-server">Server & Cloud</button>
+                <button onclick="filterCategory('External')" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white cursor-pointer transition-all filter-btn" id="btn-external">เว็บภายนอก / ทั่วไป</button>
+            </div>
         </div>
+
         <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </main>
 
     <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 tech-font">
-        &copy; 2026 IT HUB SYSTEM COMMAND CENTER.
+        &copy; 2026 IT HUB SYSTEM COMMAND CENTER. ALL SYSTEMS OPERATIONAL.
     </footer>
 
     <script>
-        // 🚨 [สำคัญมาก] เอาลิงก์ CSV ที่ได้จากการสั่ง Publish to web ของ Google Sheets มาวางแทนที่ตรงนี้ครับ!
-        const CSV_URL = "วางลิงก์_Publish_แบบ_CSV_ตรงนี้ครับ";
+        /* ⚙️ [จุดจัดการลิงก์ระบบของพี่ช่างโท]
+           พี่ต้องการแก้ไข เพิ่ม หรือลบลดลิงก์ตัวไหน สามารถมาพิมพ์จัดการในวงเล็บ [] นี้ได้เลยครับ!
+           - name     : ชื่อที่จะโชว์บนหน้าจอ
+           - category : เลือกกลุ่มข้อมูล ได้แก่ 'Network' , 'Server' , 'Database' , 'External'
+           - url      : ลิงก์ปลายทาง (ใส่ได้ทั้ง IP วงในสำนักงาน และเว็บ URL ภายนอกทั่วไปครับ)
+        */
+        const globalLinks = [
+            { name: "888 Network System", category: "Network", url: "http://172.19.3.100" }, 
+            { name: "LibreNMS Monitoring", category: "Network", url: "http://172.19.3.254" },
+            { name: "Home Assistant Control", category: "Server", url: "http://172.19.3.50:8123" },
+            { name: "Cisco Core Switch", category: "Network", url: "http://172.19.3.1" },
+            { name: "WiFi Registration Console", category: "Server", url: "https://docs.google.com/spreadsheets/" },
+            { name: "GitHub Dashboard Repository", category: "External", url: "https://github.com/Kittisak-IT/Dashboard-Monitoring" }
+        ];
 
-        async function fetchCSVData() {
-            try {
-                const response = await fetch(CSV_URL);
-                if (!response.ok) throw new Error("Fetch failed");
-                const csvText = await response.text();
-                
-                // แปลงข้อมูลข้อความ CSV ออกมาเป็น Object อาเรย์
-                const rows = csvText.split("\n").map(row => row.split(","));
-                const dataList = [];
-                
-                // ข้ามแถวที่ 1 (หัวตาราง: name, category, url) เริ่มอ่านที่แถว 2
-                for(let i = 1; i < rows.length; i++) {
-                    if(rows[i][0] && rows[i][2]) {
-                        dataList.push({
-                            name: rows[i][0].replace(/['"']/g, '').trim(),
-                            category: rows[i][1].replace(/['"']/g, '').trim(),
-                            url: rows[i][2].replace(/['"']/g, '').trim()
-                        });
-                    }
-                }
-                
-                renderGrid(dataList);
-            } catch (error) {
-                document.getElementById('frontendGrid').innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-rose-800 rounded-2xl"><p class="text-rose-400 text-sm">⚠️ ไม่สามารถดึงข้อมูลจาก Google Sheets ได้ กรุณาเช็กสิทธิ์การตั้งค่าเปิด Publish to Web</p></div>`;
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('frontend-panel').style.display = 'block';
-            }
-        }
+        let currentFilter = "All";
 
+        // ฟังก์ชันช่วยแยกประเภท ตกแต่งไอคอนและโทนสีสไตล์เนออน Cyberpunk
         function getCategoryStyle(category) {
-            switch(category.toLowerCase()) {
-                case 'network': return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60' };
-                case 'server': return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60' };
-                case 'database': return { icon: 'fa-database', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60' };
-                default: return { icon: 'fa-code', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'hover:border-purple-500/60' };
+            switch(category) {
+                case 'Network': 
+                    return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60', label: 'Network & Security' };
+                case 'Server': 
+                    return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60', label: 'Server & Cloud' };
+                case 'Database': 
+                    return { icon: 'fa-database', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60', label: 'Database & Storage' };
+                case 'External': 
+                    return { icon: 'fa-globe', color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'hover:border-fuchsia-500/60', label: 'External Website' };
+                default: 
+                    return { icon: 'fa-cubes', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'hover:border-purple-500/60', label: 'Other Tool' };
             }
         }
 
-        function renderGrid(items) {
+        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บบอร์ด
+        function renderFrontend() {
             const grid = document.getElementById('frontendGrid');
-            grid.innerHTML = items.length === 0 ? `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><p class="text-slate-400 text-sm">ยังไม่มีข้อมูลในตาราง</p></div>` : '';
-            
-            items.forEach(item => {
-                const style = getCategoryStyle(item.category);
-                grid.insertAdjacentHTML('beforeend', `
-                    <a href="${item.url}" target="_blank" class="group bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex items-center space-x-3 transition-all duration-300 hover:bg-slate-900 ${style.border}">
-                        <div class="${style.bg} ${style.color} w-11 h-11 rounded-lg flex items-center justify-center text-lg border border-slate-800 group-hover:scale-105 transition-transform">
-                            <i class="fa-solid ${style.icon}"></i>
-                        </div>
-                        <div class="overflow-hidden">
-                            <span class="text-xs font-mono tracking-wider ${style.color} uppercase">${item.category}</span>
-                            <h3 class="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors truncate">${item.name}</h3>
-                            <p class="text-xs text-slate-500 truncate font-mono mt-0.5">${item.url}</p>
-                        </div>
-                    </a>`);
-            });
-            
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('frontend-panel').style.display = 'block';
-        }
+            grid.innerHTML = '';
 
-        fetchCSVData();
-    </script>
-</body>
-</html>
+            // กรองข้อมูลตามปุ่มหมวดหมู่ที่เลือกใช้งาน
+            const filteredData = currentFilter === "All" 
+                ? globalLinks 
+                : globalLinks.filter(item => item.category === currentFilter);
+
+            if (filteredData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ไม่พบรายการระบบในหมวดหมู่นี้</p></div>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const style = getCategoryStyle(item.category);
+                
+                // ระบบตรวจเช็กอัตโนมัติว่าเป็น IP ภายใน LAN หรือไม่ เพื่อแปะป้ายสถานะบอกผู้ใช้งาน
+                const isLocalIP = /^(https?:\/\/)?(127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|10\.)/i.test(item.url);
+                const tagBadge = isLocalIP 
+                    ? `<span class="text-
