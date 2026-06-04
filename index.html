@@ -62,30 +62,48 @@
     </footer>
 
     <script>
-        // 🚨 ไอดีกูเกิลชีตของพี่ช่างโท (ดึงตรงจากรูปภาพชีต Links เรียบร้อยครับ)
+        // ไอดีกูเกิลชีตและชื่อแผ่นงาน
         const SHEET_ID = '1linr5sA7p_huXWymTqjymeJX2fUEfQpJKewTyljS9WM';
         const SHEET_NAME = 'Links';
-        // ดึงข้อมูลในรูปแบบ CSV เพื่อหลีกเลี่ยงปัญหา CORS 100%
+        // ดึงข้อมูลรูปแบบ CSV
         const FETCH_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
 
         let globalLinks = [];
         let currentFilter = "All";
 
-        // ฟังก์ชันแปลงข้อมูล CSV เป็น Array Object
+        // ฟังก์ชันแปลงข้อมูล CSV เป็น Array Object (ปรับปรุงตัวล้างเครื่องหมายคำพูดและช่องว่าง)
         function parseCSV(csvText) {
             const lines = csvText.split('\n');
             const result = [];
             
-            // วนลูปเริ่มจากแถวที่ 2 (ข้ามหัวตาราง name, category, url)
+            // วนลูปเริ่มจากแถวที่ 2 (ข้ามหัวตาราง)
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
+                let line = lines[i].trim();
+                if (!line) continue;
                 
-                // แยกคอมมาแบบรองรับเครื่องหมายคำพูดครอบข้อความ
-                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-                if (matches.length >= 3) {
-                    const name = matches[0].replace(/^"|"$/g, '').trim();
-                    const category = matches[1].replace(/^"|"$/g, '').trim();
-                    const url = matches[2].replace(/^"|"$/g, '').trim();
+                // แยกด้วยคอมมา โดยรองรับกรณีข้อความมีเครื่องหมายคำพูดครอบ
+                const tokens = [];
+                let insideQuote = false;
+                let currentToken = '';
+                
+                for (let j = 0; j < line.length; j++) {
+                    let char = line[j];
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        tokens.push(currentToken.trim());
+                        currentToken = '';
+                    } else {
+                        currentToken += char;
+                    }
+                }
+                tokens.push(currentToken.trim());
+
+                if (tokens.length >= 3) {
+                    // ล้างเครื่องหมายคำพูดที่อาจหลงเหลือหัวท้ายออกให้สะอาด 100%
+                    const name = tokens[0].replace(/^"|"$/g, '').trim();
+                    const category = tokens[1].replace(/^"|"$/g, '').trim();
+                    const url = tokens[2].replace(/^"|"$/g, '').trim();
                     
                     if (name && url) {
                         result.push({ name, category, url });
@@ -107,7 +125,7 @@
                 const csvText = await response.text();
                 globalLinks = parseCSV(csvText);
                 
-                // อัปเดตสถานะว่าออนไลน์เรียบร้อย
+                // อัปเดตสถานะออนไลน์
                 statusBadge.className = "text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5";
                 statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> GOOGLE SHEET ACTIVE`;
                 
@@ -127,26 +145,29 @@
 
         // ฟังก์ชันช่วยจัดสไตล์ตามหมวดหมู่
         function getCategoryStyle(category) {
-            switch(category) {
-                case 'Network': 
+            // ล้างช่องว่างและแปลงเป็นพิมพ์เล็กเพื่อเทียบเคียงได้แม่นยำขึ้น
+            const cleanCategory = category.trim().toLowerCase();
+            switch(cleanCategory) {
+                case 'network': 
                     return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60', label: 'Network & Security' };
-                case 'Server': 
+                case 'server': 
                     return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60', label: 'Server & Cloud' };
-                case 'External': 
+                case 'external': 
                     return { icon: 'fa-globe', color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'hover:border-fuchsia-500/60', label: 'External Website' };
                 default: 
-                    return { icon: 'fa-cubes', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60', label: 'General / Tool' };
+                    return { icon: 'fa-cubes', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60', label: category || 'General / Tool' };
             }
         }
 
-        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บ
+        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บ (ปรับปรุงระบบคัดกรองตัวกรอง)
         function renderFrontend() {
             const grid = document.getElementById('frontendGrid');
             grid.innerHTML = '';
 
+            // ทำความสะอาดและเช็กเงื่อนไขการกรองหมวดหมู่ให้ปลอดภัย
             const filteredData = currentFilter === "All" 
                 ? globalLinks 
-                : globalLinks.filter(item => item.category.toLowerCase() === currentFilter.toLowerCase());
+                : globalLinks.filter(item => item.category.trim().toLowerCase() === currentFilter.trim().toLowerCase());
 
             if (filteredData.length === 0) {
                 grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ไม่พบรายการระบบในหมวดหมู่นี้ (เพิ่มข้อมูลในแผ่นชีตได้เลย)</p></div>`;
