@@ -26,20 +26,20 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> SYSTEM LOCAL ACTIVE
-                </span>
+                <div id="connection-status" class="text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> CONNECTING DATABASE...
+                </div>
             </div>
         </div>
     </nav>
 
-    <main id="frontend-panel" class="max-w-7xl w-full mx-auto p-4 md:p-6 grow space-y-6">
+    <main class="max-w-7xl w-full mx-auto p-4 md:p-6 grow space-y-6">
         <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-cubes text-emerald-400"></i> ศูนย์รวมลิงก์และระบบบริหารจัดการไอที
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">รวบรวมเครื่องมือระบบ IP ภายใน (LAN) และเว็บไซต์ภายนอก (หากต้องการเพิ่ม/แก้ไขลิงก์ สามารถแก้ได้ในโค้ด GitHub ได้โดยตรง)</p>
+                <p class="text-xs text-slate-400 mt-1">ระบบดึงข้อมูลจาก Google Sheets โดยตรงแบบ Real-time คลิกเพื่อเปิดลิงก์ปลายทางในแท็บใหม่</p>
             </div>
             <div class="flex flex-wrap gap-2 text-xs">
                 <button onclick="filterCategory('All')" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold border border-cyan-400/30 cursor-pointer transition-all filter-btn" id="btn-all">ทั้งหมด</button>
@@ -49,7 +49,12 @@
             </div>
         </div>
 
-        <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div id="loading-view" class="col-span-full text-center py-12">
+                <i class="fa-solid fa-circle-notch text-3xl text-cyan-400 animate-spin mb-3"></i>
+                <p class="text-sm text-slate-400 font-mono">กำลังซิงค์ข้อมูลจาก Google Sheets...</p>
+            </div>
+        </div>
     </main>
 
     <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 tech-font">
@@ -57,58 +62,139 @@
     </footer>
 
     <script>
-        /* ⚙️ [จุดจัดการลิงก์ระบบของพี่ช่างโท]
-           พี่ต้องการแก้ไข เพิ่ม หรือลบลดลิงก์ตัวไหน สามารถมาพิมพ์จัดการในวงเล็บ [] นี้ได้เลยครับ!
-           - name     : ชื่อที่จะโชว์บนหน้าจอ
-           - category : เลือกกลุ่มข้อมูล ได้แก่ 'Network' , 'Server' , 'Database' , 'External'
-           - url      : ลิงก์ปลายทาง (ใส่ได้ทั้ง IP วงในสำนักงาน และเว็บ URL ภายนอกทั่วไปครับ)
-        */
-        const globalLinks = [
-            { name: "888 Network System", category: "Network", url: "http://172.19.3.100" }, 
-            { name: "LibreNMS Monitoring", category: "Network", url: "http://http://172.31.9.38" },
-            { name: "Home Assistant Control", category: "Server", url: "http://172.19.3.50:8123" },
-            { name: "Cisco Core Switch", category: "Network", url: "http://172.19.3.1" },
-            { name: "WiFi Registration Console", category: "Server", url: "https://docs.google.com/spreadsheets/" },
-            { name: "GitHub Dashboard Repository", category: "External", url: "https://github.com/Kittisak-IT/Dashboard-Monitoring" }
-        ];
+        // 🚨 ไอดีกูเกิลชีตของพี่ช่างโท (ดึงตรงจากรูปภาพชีต Links เรียบร้อยครับ)
+        const SHEET_ID = '1linr5sA7p_huXWymTqjymeJX2fUEfQpJKewTyljS9WM';
+        const SHEET_NAME = 'Links';
+        // ดึงข้อมูลในรูปแบบ CSV เพื่อหลีกเลี่ยงปัญหา CORS 100%
+        const FETCH_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
 
+        let globalLinks = [];
         let currentFilter = "All";
 
-        // ฟังก์ชันช่วยแยกประเภท ตกแต่งไอคอนและโทนสีสไตล์เนออน Cyberpunk
+        // ฟังก์ชันแปลงข้อมูล CSV เป็น Array Object
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            
+            // วนลูปเริ่มจากแถวที่ 2 (ข้ามหัวตาราง name, category, url)
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                // แยกคอมมาแบบรองรับเครื่องหมายคำพูดครอบข้อความ
+                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+                if (matches.length >= 3) {
+                    const name = matches[0].replace(/^"|"$/g, '').trim();
+                    const category = matches[1].replace(/^"|"$/g, '').trim();
+                    const url = matches[2].replace(/^"|"$/g, '').trim();
+                    
+                    if (name && url) {
+                        result.push({ name, category, url });
+                    }
+                }
+            }
+            return result;
+        }
+
+        // ฟังก์ชันหลักในการดึงข้อมูลจาก Google Sheet
+        async function fetchSheetData() {
+            const grid = document.getElementById('frontendGrid');
+            const statusBadge = document.getElementById('connection-status');
+            
+            try {
+                const response = await fetch(FETCH_URL);
+                if (!response.ok) throw new Error('Network Fail');
+                
+                const csvText = await response.text();
+                globalLinks = parseCSV(csvText);
+                
+                // อัปเดตสถานะว่าออนไลน์เรียบร้อย
+                statusBadge.className = "text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5";
+                statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> GOOGLE SHEET ACTIVE`;
+                
+                renderFrontend();
+            } catch (error) {
+                console.error(error);
+                statusBadge.className = "text-xs font-mono text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5";
+                statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> CONNECTION ERROR`;
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 border border-dashed border-rose-800/40 rounded-2xl bg-rose-500/5">
+                        <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-400 mb-2"></i>
+                        <p class="text-rose-300 text-sm font-semibold">เกิดข้อผิดพลาดในการดึงข้อมูล</p>
+                        <p class="text-slate-500 text-xs mt-1">กรุณาตรวจสอบว่าเปิดสิทธิ์การแชร์ Google Sheets เป็น "ทุกคนที่มีลิงก์" แล้วหรือยัง</p>
+                    </div>`;
+            }
+        }
+
+        // ฟังก์ชันช่วยจัดสไตล์ตามหมวดหมู่
         function getCategoryStyle(category) {
             switch(category) {
                 case 'Network': 
                     return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60', label: 'Network & Security' };
                 case 'Server': 
                     return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60', label: 'Server & Cloud' };
-                case 'Database': 
-                    return { icon: 'fa-database', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60', label: 'Database & Storage' };
                 case 'External': 
                     return { icon: 'fa-globe', color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'hover:border-fuchsia-500/60', label: 'External Website' };
                 default: 
-                    return { icon: 'fa-cubes', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'hover:border-purple-500/60', label: 'Other Tool' };
+                    return { icon: 'fa-cubes', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60', label: 'General / Tool' };
             }
         }
 
-        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บบอร์ด
+        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บ
         function renderFrontend() {
             const grid = document.getElementById('frontendGrid');
             grid.innerHTML = '';
 
-            // กรองข้อมูลตามปุ่มหมวดหมู่ที่เลือกใช้งาน
             const filteredData = currentFilter === "All" 
                 ? globalLinks 
-                : globalLinks.filter(item => item.category === currentFilter);
+                : globalLinks.filter(item => item.category.toLowerCase() === currentFilter.toLowerCase());
 
             if (filteredData.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ไม่พบรายการระบบในหมวดหมู่นี้</p></div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ไม่พบรายการระบบในหมวดหมู่นี้ (เพิ่มข้อมูลในแผ่นชีตได้เลย)</p></div>`;
                 return;
             }
 
             filteredData.forEach(item => {
                 const style = getCategoryStyle(item.category);
-                
-                // ระบบตรวจเช็กอัตโนมัติว่าเป็น IP ภายใน LAN หรือไม่ เพื่อแปะป้ายสถานะบอกผู้ใช้งาน
                 const isLocalIP = /^(https?:\/\/)?(127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|10\.)/i.test(item.url);
                 const tagBadge = isLocalIP 
-                    ? `<span class="text-
+                    ? `<span class="text-[10px] font-mono tracking-wide bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 ml-2">INTERNAL LAN</span>`
+                    : `<span class="text-[10px] font-mono tracking-wide bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 ml-2">PUBLIC URL</span>`;
+
+                grid.insertAdjacentHTML('beforeend', `
+                    <a href="${item.url}" target="_blank" class="group bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex items-center space-x-3 transition-all duration-300 hover:bg-slate-900/80 ${style.border}">
+                        <div class="${style.bg} ${style.color} w-12 h-12 rounded-lg flex items-center justify-center text-xl border border-slate-800 shrink-0 group-hover:scale-105 transition-transform">
+                            <i class="fa-solid ${style.icon}"></i>
+                        </div>
+                        <div class="overflow-hidden w-full">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono tracking-wider ${style.color} uppercase font-bold">${style.label}</span>
+                                ${tagBadge}
+                            </div>
+                            <h3 class="text-sm font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors truncate mt-0.5">${item.name}</h3>
+                            <p class="text-xs text-slate-500 truncate font-mono mt-0.5 flex items-center gap-1">
+                                <i class="fa-solid fa-link text-[10px]"></i> ${item.url}
+                            </p>
+                        </div>
+                    </a>`);
+            });
+        }
+
+        // ฟังก์ชันสลับเมนูและเปลี่ยนสถานะปุ่มตัวกรอง
+        function filterCategory(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white cursor-pointer transition-all filter-btn";
+            });
+
+            const activeBtn = document.getElementById(`btn-${category.toLowerCase()}`);
+            if (activeBtn) {
+                activeBtn.className = "px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold border border-cyan-400/30 cursor-pointer transition-all filter-btn shadow-[0_0_10px_rgba(6,182,212,0.3)]";
+            }
+            renderFrontend();
+        }
+
+        // เรียกใช้งานฟังก์ชันดึงข้อมูลทันทีเมื่อเปิดหน้าจอ
+        fetchSheetData();
+    </script>
+</body>
+</html>
