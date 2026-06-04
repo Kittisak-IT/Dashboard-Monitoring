@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT HUB - Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Noto Sans Thai', sans-serif; background-color: #0b0f19; }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        .neon-glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        .neon-text-cyan { text-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col justify-between">
+
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-500 p-2 rounded-lg text-slate-950 neon-glow-cyan">
+                    <i class="fa-solid fa-terminal text-xl"></i>
+                </div>
+                <span class="tech-font text-2xl font-bold tracking-wider text-cyan-400 neon-text-cyan">IT<span class="text-emerald-400">HUB</span></span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button id="btn-frontend-view" onclick="switchView('frontend')" class="hidden text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl transition-all items-center gap-1.5 font-bold">
+                    <i class="fa-solid fa-house"></i> กลับสู่หน้าบ้าน
+                </button>
+                <button id="btn-backend-view" onclick="openLoginModal()" class="text-xs bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 font-bold shadow-lg">
+                    <i class="fa-solid fa-lock"></i> จัดการหลังบ้าน
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="loading-screen" class="grow flex flex-col justify-center items-center gap-3">
+        <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-xs font-mono text-cyan-400 tracking-widest animate-pulse">CONNECTING TO DATABASE...</p>
+    </div>
+
+    <main id="frontend-panel" class="hidden max-w-7xl w-full mx-auto p-4 md:p-6 grow space-y-6">
+        <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/80">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-cubes text-emerald-400"></i> ศูนย์รวมลิงก์และระบบบริหารจัดการ
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">ยินดีต้อนรับเข้าสู่ระบบรวบรวมเครื่องมือไอทีส่วนกลาง คลิกเลือกเมนูที่ต้องการเพื่อเปิดระบบในแท็บใหม่</p>
+        </div>
+        <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </main>
+
+    <main id="backend-panel" class="hidden max-w-7xl w-full mx-auto p-4 md:p-6 grow grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-1 bg-slate-900/60 border border-slate-800 rounded-2xl p-5 h-fit">
+            <div class="flex items-center space-x-2 pb-4 mb-4 border-b border-slate-800">
+                <i class="fa-solid fa-sliders text-cyan-400"></i>
+                <h2 class="text-lg font-bold text-slate-100">Control Panel</h2>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">ชื่อระบบ / เครื่องมือ</label>
+                    <input type="text" id="toolName" placeholder="เช่น LibreNMS, Home Assistant" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">หมวดหมู่</label>
+                    <select id="toolCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
+                        <option value="Network">Network & Monitoring</option>
+                        <option value="Server">Server & Cloud</option>
+                        <option value="Database">Database & Storage</option>
+                        <option value="DevTools">Development Tools</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">URL ลิงก์ระบบ</label>
+                    <input type="url" id="toolUrl" placeholder="https://..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
+                </div>
+                <button onclick="addLink()" class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-px font-bold shadow-lg neon-glow-cyan">
+                    <span class="block rounded-[11px] bg-slate-950 px-4 py-3 text-sm font-semibold text-cyan-400 group-hover:bg-transparent group-hover:text-slate-950 flex justify-center items-center gap-2 transition-all">
+                        <i class="fa-solid fa-plus-circle"></i> บันทึกเข้าระบบส่วนกลาง
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 space-y-4">
+            <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/80">
+                <h2 class="text-base font-bold text-white"><i class="fa-solid fa-gears text-cyan-400"></i> แผงควบคุมสิทธิ์แอดมิน</h2>
+                <p class="text-xs text-slate-400 mt-0.5">คุณสามารถ เพิ่ม หรือ ลบ ลิงก์ข้อมูลส่วนกลางได้ในหน้านี้ การเปลี่ยนแปลงจะมีผลกับผู้ใช้งานทุกคน</p>
+            </div>
+            <div id="backendGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </main>
+
+    <div id="loginModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <div class="text-center">
+                <i class="fa-solid fa-shield-halved text-cyan-400 text-3xl mb-2"></i>
+                <h3 class="text-lg font-bold text-white">ยืนยันสิทธิ์ผู้ดูแลระบบ</h3>
+                <p class="text-xs text-slate-400 mt-1">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบควบคุมหลังบ้าน</p>
+            </div>
+            <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-center text-slate-100 focus:outline-none focus:border-cyan-500">
+            <div class="flex space-x-2">
+                <button onclick="closeLoginModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-sm transition-colors">ยกเลิก</button>
+                <button onclick="verifyAndLogin()" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 py-2 rounded-xl text-sm font-bold transition-colors">เข้าสู่ระบบ</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 tech-font">
+        &copy; 2026 IT HUB SYSTEM COMMAND CENTER. ALL RIGHTS RESERVED.
+    </footer>
+
+    <script>
+        // เชื่อมต่อเข้าหากูเกิลแอปสคริปต์เวอร์ชันล่าสุดที่แก้ CORS แล้วเรียบร้อย
+        const API_URL = "https://script.google.com/macros/s/AKfycbyDIPls1mPzrcQqteM5PDMTjrR25QNyMOVn8PG1vHvMarUKsZhGU08MK3XaSlHFa1M/exec"; 
+        
+        let currentPassword = ""; 
+        let globalLinks = [];
+
+        async function fetchLinks() {
+            showLoading(true);
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Network Fail');
+                globalLinks = await response.json();
+                
+                renderFrontend();
+                if (currentPassword) renderBackend();
+                switchView(currentPassword ? 'backend' : 'frontend');
+            } catch (error) {
+                alert("❌ ไม่สามารถดึงข้อมูลจาก Database ได้ กรุณาตรวจสอบการตั้งค่า Deployment ของ Apps Script");
+                switchView('frontend');
+            }
+            showLoading(false);
+        }
+
+        function getCategoryStyle(category) {
+            switch(category) {
+                case 'Network': return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60' };
+                case 'Server': return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60' };
+                case 'Database': return { icon: 'fa-database', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60' };
+                default: return { icon: 'fa-code', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'hover:border-purple-500/60' };
+            }
+        }
+
+        function renderFrontend() {
+            const grid = document.getElementById('frontendGrid');
+            grid.innerHTML = globalLinks.length === 0 ? getEmptyTemplate() : '';
+            globalLinks.forEach(item => {
+                const style = getCategoryStyle(item.category);
+                grid.insertAdjacentHTML('beforeend', `
+                    <a href="${item.url}" target="_blank" class="group bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex items-center space-x-3 transition-all duration-300 hover:bg-slate-900 ${style.border}">
+                        <div class="${style.bg} ${style.color} w-11 h-11 rounded-lg flex items-center justify-center text-lg border border-slate-800 group-hover:scale-105 transition-transform">
+                            <i class="fa-solid ${style.icon}"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <span class="text-xs font-mono tracking-wider ${style.color} uppercase">${item.category}</span>
+                            <h3 class="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors truncate">${item.name}</h3>
+                            <p class="text-xs text-slate-500 truncate font-mono mt-0.5">${item.url}</p>
+                        </div>
+                    </a>`);
+            });
+        }
+
+        function renderBackend() {
+            const grid = document.getElementById('backendGrid');
+            grid.innerHTML = globalLinks.length === 0 ? getEmptyTemplate() : '';
+            globalLinks.forEach(item => {
+                const style = getCategoryStyle(item.category);
+                grid.insertAdjacentHTML('beforeend', `
+                    <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-3 truncate mr-2">
+                            <div class="${style.bg} ${style.color} w-10 h-10 rounded-lg flex items-center justify-center text-sm shrink-0"><i class="fa-solid ${style.icon}"></i></div>
+                            <div class="truncate">
+                                <h3 class="text-sm font-semibold text-slate-200 truncate">${item.name}</h3>
+                                <p class="text-xs text-slate-500 truncate font-mono">${item.url}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteLink(${item.id})" class="text-slate-500 hover:text-rose-400 p-2 rounded-lg hover:bg-slate-950 transition-colors shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </div>`);
+            });
+        }
+
+        async function sendPostRequest(payload, isLogin = false) {
+            showLoading(true);
+            try {
+                const response = await fetch(API_URL, { 
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(payload) 
+                });
+                
+                if (isLogin) {
+                    const result = await response.json();
+                    showLoading(false);
+                    return result;
+                }
+                
+                setTimeout(async () => {
+                    await fetchLinks();
+                }, 1500);
+                
+            } catch (error) {
+                if (isLogin) {
+                    showLoading(false);
+                    return { status: "error", message: "ระบบตรวจสอบสิทธิ์ขัดข้อง" };
+                }
+                alert("❌ การทำรายการล้มเหลว");
+                showLoading(false);
+            }
+        }
+
+        async function addLink() {
+            const name = document.getElementById('toolName').value.trim();
+            const category = document.getElementById('toolCategory').value;
+            let url = document.getElementById('toolUrl').value.trim();
+
+            if (!name || !url) { alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วนครับ'); return; }
+            if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+
+            await sendPostRequest({ action: "add", password: currentPassword, name, category, url });
+            document.getElementById('toolName').value = '';
+            document.getElementById('toolUrl').value = '';
+        }
+
+        async function deleteLink(rowId) {
+            if(confirm('คุณต้องการลบลิงก์ระบบนี้ออกจากฐานข้อมูลกลางใช่หรือไม่?')) {
+                await sendPostRequest({ action: "delete", password: currentPassword, id: rowId });
+            }
+        }
+
+        function getEmptyTemplate() {
+            return `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ยังไม่มีลิงก์ระบบในฐานข้อมูล</p></div>`;
+        }
+
+        function showLoading(isLoading) {
+            document.getElementById('loading-screen').style.display = isLoading ? 'flex' : 'none';
+            if(isLoading) {
+                document.getElementById('frontend-panel').style.display = 'none';
+                document.getElementById('backend-panel').style.display = 'none';
+            }
+        }
+
+        function switchView(view) {
+            document.getElementById('frontend-panel').style.display = view === 'frontend' ? 'block' : 'none';
+            document.getElementById('backend-panel').style.display = view === 'backend' ? 'grid' : 'none';
+            document.getElementById('btn-frontend-view').style.display = view === 'backend' ? 'flex' : 'none';
+            document.getElementById('btn-backend-view').style.display = view === 'frontend' ? 'flex' : 'none';
+        }
+
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; }
+        
+        async function verifyAndLogin() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if(!pass) return;
+            
+            const res = await sendPostRequest({ action: "login_check", password: pass }, true);
+            
+            if (res && res.status === "success") {
+                currentPassword = pass;
+                closeLoginModal();
+                switchView('backend');
+                renderBackend();
+            } else {
+                alert("❌ รหัสผ่านแอดมินไม่ถูกต้องครับ!");
+                document.getElementById('adminPasswordInput').value = '';
+            }
+        }
+
+        fetchLinks();
+    </script>
+</body>
+</html>
