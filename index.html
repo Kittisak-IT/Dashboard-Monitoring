@@ -26,10 +26,10 @@
             </div>
             
             <div class="flex items-center space-x-3">
-                <button id="btn-frontend-view" onclick="switchView('frontend')" class="hidden text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl transition-all items-center gap-1.5 font-bold">
+                <button id="btn-frontend-view" onclick="switchView('frontend')" class="hidden text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl transition-all items-center gap-1.5 font-bold cursor-pointer">
                     <i class="fa-solid fa-house"></i> กลับสู่หน้าบ้าน
                 </button>
-                <button id="btn-backend-view" onclick="openLoginModal()" class="text-xs bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 font-bold shadow-lg">
+                <button id="btn-backend-view" onclick="openLoginModal()" class="text-xs bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 font-bold shadow-lg cursor-pointer">
                     <i class="fa-solid fa-lock"></i> จัดการหลังบ้าน
                 </button>
             </div>
@@ -75,7 +75,7 @@
                     <label class="block text-xs font-medium text-slate-400 mb-1">URL ลิงก์ระบบ</label>
                     <input type="url" id="toolUrl" placeholder="https://..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
                 </div>
-                <button onclick="addLink()" class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-px font-bold shadow-lg neon-glow-cyan">
+                <button onclick="addLink()" class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-px font-bold shadow-lg neon-glow-cyan cursor-pointer">
                     <span class="block rounded-[11px] bg-slate-950 px-4 py-3 text-sm font-semibold text-cyan-400 group-hover:bg-transparent group-hover:text-slate-950 flex justify-center items-center gap-2 transition-all">
                         <i class="fa-solid fa-plus-circle"></i> บันทึกเข้าระบบส่วนกลาง
                     </span>
@@ -101,8 +101,8 @@
             </div>
             <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-center text-slate-100 focus:outline-none focus:border-cyan-500">
             <div class="flex space-x-2">
-                <button onclick="closeLoginModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-sm transition-colors">ยกเลิก</button>
-                <button onclick="verifyAndLogin()" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 py-2 rounded-xl text-sm font-bold transition-colors">เข้าสู่ระบบ</button>
+                <button onclick="closeLoginModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-sm transition-colors cursor-pointer">ยกเลิก</button>
+                <button onclick="verifyAndLogin()" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer">เข้าสู่ระบบ</button>
             </div>
         </div>
     </div>
@@ -112,16 +112,17 @@
     </footer>
 
     <script>
-        // เชื่อมต่อเข้าหากูเกิลแอปสคริปต์เวอร์ชันล่าสุดที่แก้ CORS แล้วเรียบร้อย
+        // 🚨 [จุดสำคัญ] พี่เอาลิงก์ Web App (ตัวที่สร้างจากในเมนู ส่วนขยาย ของกูเกิลชีต) มาวางแทนที่ตรงนี้เลยครับ!
         const API_URL = "https://script.google.com/macros/s/AKfycbyDIPls1mPzrcQqteM5PDMTjrR25QNyMOVn8PG1vHvMarUKsZhGU08MK3XaSlHFa1M/exec"; 
         
         let currentPassword = ""; 
         let globalLinks = [];
 
+        // 📥 ขาดึงข้อมูล (GET) ทำการห้อย Timestamp กันบราวเซอร์จำแคชเก่า
         async function fetchLinks() {
             showLoading(true);
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(`${API_URL}?_=${new Date().getTime()}`);
                 if (!response.ok) throw new Error('Network Fail');
                 globalLinks = await response.json();
                 
@@ -129,10 +130,11 @@
                 if (currentPassword) renderBackend();
                 switchView(currentPassword ? 'backend' : 'frontend');
             } catch (error) {
-                alert("❌ ไม่สามารถดึงข้อมูลจาก Database ได้ กรุณาตรวจสอบการตั้งค่า Deployment ของ Apps Script");
+                alert("❌ ไม่สามารถดึงข้อมูลจาก Database ได้ กรุณาตรวจสอบการตั้งค่า Deployment ของ Apps Script และตรวจเช็กชื่อแท็บในชีตว่าตั้งชื่อว่า Links หรือไม่");
                 switchView('frontend');
+            } finally {
+                showLoading(false);
             }
-            showLoading(false);
         }
 
         function getCategoryStyle(category) {
@@ -177,37 +179,57 @@
                                 <p class="text-xs text-slate-500 truncate font-mono">${item.url}</p>
                             </div>
                         </div>
-                        <button onclick="deleteLink(${item.id})" class="text-slate-500 hover:text-rose-400 p-2 rounded-lg hover:bg-slate-950 transition-colors shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        <button onclick="deleteLink(${item.id})" class="text-slate-500 hover:text-rose-400 p-2 rounded-lg hover:bg-slate-950 transition-colors shrink-0 cursor-pointer"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>`);
             });
         }
 
-        async function sendPostRequest(payload, isLogin = false) {
+        // 🔑 ฟังก์ชันแกนหลัก ส่งคำสั่งแบบ FormData หลบเลี่ยงปัญหา CORS บล็อกสิทธิ์รหัสผ่าน
+        async function sendActionRequest(formData) {
             showLoading(true);
             try {
                 const response = await fetch(API_URL, { 
                     method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify(payload) 
+                    body: formData // ส่งก้อนฟอร์มบริสุทธิ์
                 });
+                const result = await response.json();
                 
-                if (isLogin) {
-                    const result = await response.json();
-                    showLoading(false);
+                if(result.status === "success") {
+                    if (formData.get("action") !== "login_check") {
+                        // หน่วงเวลาเล็กน้อยให้กูเกิลเขียนข้อมูลเสร็จแล้วดึงข้อมูลใหม่
+                        setTimeout(() => { fetchLinks(); }, 1000);
+                    } else {
+                        showLoading(false);
+                    }
                     return result;
-                }
-                
-                setTimeout(async () => {
-                    await fetchLinks();
-                }, 1500);
-                
-            } catch (error) {
-                if (isLogin) {
+                } else {
+                    alert("❌ " + result.message);
                     showLoading(false);
-                    return { status: "error", message: "ระบบตรวจสอบสิทธิ์ขัดข้อง" };
+                    return null;
                 }
-                alert("❌ การทำรายการล้มเหลว");
+            } catch (error) {
+                alert("❌ การเชื่อมต่อระบบหลังบ้านล้มเหลว");
                 showLoading(false);
+                return null;
+            }
+        }
+
+        async function verifyAndLogin() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if(!pass) return alert("กรุณากรอกรหัสผ่านก่อนครับ");
+            
+            const bindForm = new FormData();
+            bindForm.append("action", "login_check");
+            bindForm.append("password", pass);
+
+            const res = await sendActionRequest(bindForm);
+            if (res && res.status === "success") {
+                currentPassword = pass;
+                closeLoginModal();
+                switchView('backend');
+                renderBackend();
+            } else {
+                document.getElementById('adminPasswordInput').value = '';
             }
         }
 
@@ -216,17 +238,28 @@
             const category = document.getElementById('toolCategory').value;
             let url = document.getElementById('toolUrl').value.trim();
 
-            if (!name || !url) { alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วนครับ'); return; }
+            if (!name || !url) return alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วนครับ');
             if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
 
-            await sendPostRequest({ action: "add", password: currentPassword, name, category, url });
+            const bindForm = new FormData();
+            bindForm.append("action", "add");
+            bindForm.append("password", currentPassword);
+            bindForm.append("name", name);
+            bindForm.append("category", category);
+            bindForm.append("url", url);
+
+            await sendActionRequest(bindForm);
             document.getElementById('toolName').value = '';
             document.getElementById('toolUrl').value = '';
         }
 
         async function deleteLink(rowId) {
             if(confirm('คุณต้องการลบลิงก์ระบบนี้ออกจากฐานข้อมูลกลางใช่หรือไม่?')) {
-                await sendPostRequest({ action: "delete", password: currentPassword, id: rowId });
+                const bindForm = new FormData();
+                bindForm.append("action", "delete");
+                bindForm.append("password", currentPassword);
+                bindForm.append("id", rowId);
+                await sendActionRequest(bindForm);
             }
         }
 
@@ -251,24 +284,8 @@
 
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; }
-        
-        async function verifyAndLogin() {
-            const pass = document.getElementById('adminPasswordInput').value;
-            if(!pass) return;
-            
-            const res = await sendPostRequest({ action: "login_check", password: pass }, true);
-            
-            if (res && res.status === "success") {
-                currentPassword = pass;
-                closeLoginModal();
-                switchView('backend');
-                renderBackend();
-            } else {
-                alert("❌ รหัสผ่านแอดมินไม่ถูกต้องครับ!");
-                document.getElementById('adminPasswordInput').value = '';
-            }
-        }
 
+        // เริ่มต้นการดึงข้อมูลเมื่อโหลดหน้าเว็บ
         fetchLinks();
     </script>
 </body>
