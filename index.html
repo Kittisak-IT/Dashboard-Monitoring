@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT HUB - Command Center</title>
+    <title>IT HUB - Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,21 +24,13 @@
                 </div>
                 <span class="tech-font text-2xl font-bold tracking-wider text-cyan-400 neon-text-cyan">IT<span class="text-emerald-400">HUB</span></span>
             </div>
-            
-            <div class="flex items-center space-x-3">
-                <button id="btn-frontend-view" onclick="switchView('frontend')" class="hidden text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl transition-all items-center gap-1.5 font-bold cursor-pointer">
-                    <i class="fa-solid fa-house"></i> กลับสู่หน้าบ้าน
-                </button>
-                <button id="btn-backend-view" onclick="openLoginModal()" class="text-xs bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 font-bold shadow-lg cursor-pointer">
-                    <i class="fa-solid fa-lock"></i> จัดการหลังบ้าน
-                </button>
-            </div>
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 animate-pulse">● LIVE DATABASE</span>
         </div>
     </nav>
 
     <div id="loading-screen" class="grow flex flex-col justify-center items-center gap-3">
         <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-xs font-mono text-cyan-400 tracking-widest animate-pulse">CONNECTING TO DATABASE...</p>
+        <p class="text-xs font-mono text-cyan-400 tracking-widest">FETCHING DATA...</p>
     </div>
 
     <main id="frontend-panel" class="hidden max-w-7xl w-full mx-auto p-4 md:p-6 grow space-y-6">
@@ -46,110 +38,62 @@
             <h1 class="text-xl font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-cubes text-emerald-400"></i> ศูนย์รวมลิงก์และระบบบริหารจัดการ
             </h1>
-            <p class="text-xs text-slate-400 mt-1">ยินดีต้อนรับเข้าสู่ระบบรวบรวมเครื่องมือไอทีส่วนกลาง คลิกเลือกเมนูที่ต้องการเพื่อเปิดระบบในแท็บใหม่</p>
+            <p class="text-xs text-slate-400 mt-1">ข้อมูลถูกดึงจาก Google Sheets โดยตรงแบบ Real-time หากต้องการเพิ่มหรือแก้ไขลิงก์ ให้แก้ไขในไฟล์สเปรดชีตหลักได้เลยครับ</p>
         </div>
         <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </main>
 
-    <main id="backend-panel" class="hidden max-w-7xl w-full mx-auto p-4 md:p-6 grow grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-1 bg-slate-900/60 border border-slate-800 rounded-2xl p-5 h-fit">
-            <div class="flex items-center space-x-2 pb-4 mb-4 border-b border-slate-800">
-                <i class="fa-solid fa-sliders text-cyan-400"></i>
-                <h2 class="text-lg font-bold text-slate-100">Control Panel</h2>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">ชื่อระบบ / เครื่องมือ</label>
-                    <input type="text" id="toolName" placeholder="เช่น LibreNMS, Home Assistant" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">หมวดหมู่</label>
-                    <select id="toolCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
-                        <option value="Network">Network & Monitoring</option>
-                        <option value="Server">Server & Cloud</option>
-                        <option value="Database">Database & Storage</option>
-                        <option value="DevTools">Development Tools</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">URL ลิงก์ระบบ</label>
-                    <input type="url" id="toolUrl" placeholder="https://..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
-                </div>
-                <button onclick="addLink()" class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-px font-bold shadow-lg neon-glow-cyan cursor-pointer">
-                    <span class="block rounded-[11px] bg-slate-950 px-4 py-3 text-sm font-semibold text-cyan-400 group-hover:bg-transparent group-hover:text-slate-950 flex justify-center items-center gap-2 transition-all">
-                        <i class="fa-solid fa-plus-circle"></i> บันทึกเข้าระบบส่วนกลาง
-                    </span>
-                </button>
-            </div>
-        </div>
-
-        <div class="lg:col-span-3 space-y-4">
-            <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/80">
-                <h2 class="text-base font-bold text-white"><i class="fa-solid fa-gears text-cyan-400"></i> แผงควบคุมสิทธิ์แอดมิน</h2>
-                <p class="text-xs text-slate-400 mt-0.5">คุณสามารถ เพิ่ม หรือ ลบ ลิงก์ข้อมูลส่วนกลางได้ในหน้านี้ การเปลี่ยนแปลงจะมีผลกับผู้ใช้งานทุกคน</p>
-            </div>
-            <div id="backendGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        </div>
-    </main>
-
-    <div id="loginModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-            <div class="text-center">
-                <i class="fa-solid fa-shield-halved text-cyan-400 text-3xl mb-2"></i>
-                <h3 class="text-lg font-bold text-white">ยืนยันสิทธิ์ผู้ดูแลระบบ</h3>
-                <p class="text-xs text-slate-400 mt-1">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบควบคุมหลังบ้าน</p>
-            </div>
-            <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-center text-slate-100 focus:outline-none focus:border-cyan-500">
-            <div class="flex space-x-2">
-                <button onclick="closeLoginModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-sm transition-colors cursor-pointer">ยกเลิก</button>
-                <button onclick="verifyAndLogin()" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer">เข้าสู่ระบบ</button>
-            </div>
-        </div>
-    </div>
-
     <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 tech-font">
-        &copy; 2026 IT HUB SYSTEM COMMAND CENTER. ALL RIGHTS RESERVED.
+        &copy; 2026 IT HUB SYSTEM COMMAND CENTER.
     </footer>
 
     <script>
-        // 🚨 [จุดสำคัญ] พี่เอาลิงก์ Web App (ตัวที่สร้างจากในเมนู ส่วนขยาย ของกูเกิลชีต) มาวางแทนที่ตรงนี้เลยครับ!
-        const API_URL = "https://script.google.com/macros/s/AKfycbyDIPls1mPzrcQqteM5PDMTjrR25QNyMOVn8PG1vHvMarUKsZhGU08MK3XaSlHFa1M/exec"; 
-        
-        let currentPassword = ""; 
-        let globalLinks = [];
+        // 🚨 [สำคัญมาก] เอาลิงก์ CSV ที่ได้จากการสั่ง Publish to web ของ Google Sheets มาวางแทนที่ตรงนี้ครับ!
+        const CSV_URL = "วางลิงก์_Publish_แบบ_CSV_ตรงนี้ครับ";
 
-        // 📥 ขาดึงข้อมูล (GET) ทำการห้อย Timestamp กันบราวเซอร์จำแคชเก่า
-        async function fetchLinks() {
-            showLoading(true);
+        async function fetchCSVData() {
             try {
-                const response = await fetch(`${API_URL}?_=${new Date().getTime()}`);
-                if (!response.ok) throw new Error('Network Fail');
-                globalLinks = await response.json();
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error("Fetch failed");
+                const csvText = await response.text();
                 
-                renderFrontend();
-                if (currentPassword) renderBackend();
-                switchView(currentPassword ? 'backend' : 'frontend');
+                // แปลงข้อมูลข้อความ CSV ออกมาเป็น Object อาเรย์
+                const rows = csvText.split("\n").map(row => row.split(","));
+                const dataList = [];
+                
+                // ข้ามแถวที่ 1 (หัวตาราง: name, category, url) เริ่มอ่านที่แถว 2
+                for(let i = 1; i < rows.length; i++) {
+                    if(rows[i][0] && rows[i][2]) {
+                        dataList.push({
+                            name: rows[i][0].replace(/['"']/g, '').trim(),
+                            category: rows[i][1].replace(/['"']/g, '').trim(),
+                            url: rows[i][2].replace(/['"']/g, '').trim()
+                        });
+                    }
+                }
+                
+                renderGrid(dataList);
             } catch (error) {
-                alert("❌ ไม่สามารถดึงข้อมูลจาก Database ได้ กรุณาตรวจสอบการตั้งค่า Deployment ของ Apps Script และตรวจเช็กชื่อแท็บในชีตว่าตั้งชื่อว่า Links หรือไม่");
-                switchView('frontend');
-            } finally {
-                showLoading(false);
+                document.getElementById('frontendGrid').innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-rose-800 rounded-2xl"><p class="text-rose-400 text-sm">⚠️ ไม่สามารถดึงข้อมูลจาก Google Sheets ได้ กรุณาเช็กสิทธิ์การตั้งค่าเปิด Publish to Web</p></div>`;
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('frontend-panel').style.display = 'block';
             }
         }
 
         function getCategoryStyle(category) {
-            switch(category) {
-                case 'Network': return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60' };
-                case 'Server': return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60' };
-                case 'Database': return { icon: 'fa-database', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60' };
+            switch(category.toLowerCase()) {
+                case 'network': return { icon: 'fa-network-wired', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'hover:border-cyan-500/60' };
+                case 'server': return { icon: 'fa-server', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/60' };
+                case 'database': return { icon: 'fa-database', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/60' };
                 default: return { icon: 'fa-code', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'hover:border-purple-500/60' };
             }
         }
 
-        function renderFrontend() {
+        function renderGrid(items) {
             const grid = document.getElementById('frontendGrid');
-            grid.innerHTML = globalLinks.length === 0 ? getEmptyTemplate() : '';
-            globalLinks.forEach(item => {
+            grid.innerHTML = items.length === 0 ? `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><p class="text-slate-400 text-sm">ยังไม่มีข้อมูลในตาราง</p></div>` : '';
+            
+            items.forEach(item => {
                 const style = getCategoryStyle(item.category);
                 grid.insertAdjacentHTML('beforeend', `
                     <a href="${item.url}" target="_blank" class="group bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex items-center space-x-3 transition-all duration-300 hover:bg-slate-900 ${style.border}">
@@ -163,130 +107,12 @@
                         </div>
                     </a>`);
             });
-        }
-
-        function renderBackend() {
-            const grid = document.getElementById('backendGrid');
-            grid.innerHTML = globalLinks.length === 0 ? getEmptyTemplate() : '';
-            globalLinks.forEach(item => {
-                const style = getCategoryStyle(item.category);
-                grid.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between">
-                        <div class="flex items-center space-x-3 truncate mr-2">
-                            <div class="${style.bg} ${style.color} w-10 h-10 rounded-lg flex items-center justify-center text-sm shrink-0"><i class="fa-solid ${style.icon}"></i></div>
-                            <div class="truncate">
-                                <h3 class="text-sm font-semibold text-slate-200 truncate">${item.name}</h3>
-                                <p class="text-xs text-slate-500 truncate font-mono">${item.url}</p>
-                            </div>
-                        </div>
-                        <button onclick="deleteLink(${item.id})" class="text-slate-500 hover:text-rose-400 p-2 rounded-lg hover:bg-slate-950 transition-colors shrink-0 cursor-pointer"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                    </div>`);
-            });
-        }
-
-        // 🔑 ฟังก์ชันแกนหลัก ส่งคำสั่งแบบ FormData หลบเลี่ยงปัญหา CORS บล็อกสิทธิ์รหัสผ่าน
-        async function sendActionRequest(formData) {
-            showLoading(true);
-            try {
-                const response = await fetch(API_URL, { 
-                    method: "POST",
-                    body: formData // ส่งก้อนฟอร์มบริสุทธิ์
-                });
-                const result = await response.json();
-                
-                if(result.status === "success") {
-                    if (formData.get("action") !== "login_check") {
-                        // หน่วงเวลาเล็กน้อยให้กูเกิลเขียนข้อมูลเสร็จแล้วดึงข้อมูลใหม่
-                        setTimeout(() => { fetchLinks(); }, 1000);
-                    } else {
-                        showLoading(false);
-                    }
-                    return result;
-                } else {
-                    alert("❌ " + result.message);
-                    showLoading(false);
-                    return null;
-                }
-            } catch (error) {
-                alert("❌ การเชื่อมต่อระบบหลังบ้านล้มเหลว");
-                showLoading(false);
-                return null;
-            }
-        }
-
-        async function verifyAndLogin() {
-            const pass = document.getElementById('adminPasswordInput').value;
-            if(!pass) return alert("กรุณากรอกรหัสผ่านก่อนครับ");
             
-            const bindForm = new FormData();
-            bindForm.append("action", "login_check");
-            bindForm.append("password", pass);
-
-            const res = await sendActionRequest(bindForm);
-            if (res && res.status === "success") {
-                currentPassword = pass;
-                closeLoginModal();
-                switchView('backend');
-                renderBackend();
-            } else {
-                document.getElementById('adminPasswordInput').value = '';
-            }
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('frontend-panel').style.display = 'block';
         }
 
-        async function addLink() {
-            const name = document.getElementById('toolName').value.trim();
-            const category = document.getElementById('toolCategory').value;
-            let url = document.getElementById('toolUrl').value.trim();
-
-            if (!name || !url) return alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วนครับ');
-            if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
-
-            const bindForm = new FormData();
-            bindForm.append("action", "add");
-            bindForm.append("password", currentPassword);
-            bindForm.append("name", name);
-            bindForm.append("category", category);
-            bindForm.append("url", url);
-
-            await sendActionRequest(bindForm);
-            document.getElementById('toolName').value = '';
-            document.getElementById('toolUrl').value = '';
-        }
-
-        async function deleteLink(rowId) {
-            if(confirm('คุณต้องการลบลิงก์ระบบนี้ออกจากฐานข้อมูลกลางใช่หรือไม่?')) {
-                const bindForm = new FormData();
-                bindForm.append("action", "delete");
-                bindForm.append("password", currentPassword);
-                bindForm.append("id", rowId);
-                await sendActionRequest(bindForm);
-            }
-        }
-
-        function getEmptyTemplate() {
-            return `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ยังไม่มีลิงก์ระบบในฐานข้อมูล</p></div>`;
-        }
-
-        function showLoading(isLoading) {
-            document.getElementById('loading-screen').style.display = isLoading ? 'flex' : 'none';
-            if(isLoading) {
-                document.getElementById('frontend-panel').style.display = 'none';
-                document.getElementById('backend-panel').style.display = 'none';
-            }
-        }
-
-        function switchView(view) {
-            document.getElementById('frontend-panel').style.display = view === 'frontend' ? 'block' : 'none';
-            document.getElementById('backend-panel').style.display = view === 'backend' ? 'grid' : 'none';
-            document.getElementById('btn-frontend-view').style.display = view === 'backend' ? 'flex' : 'none';
-            document.getElementById('btn-backend-view').style.display = view === 'frontend' ? 'flex' : 'none';
-        }
-
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('adminPasswordInput').value = ''; }
-
-        // เริ่มต้นการดึงข้อมูลเมื่อโหลดหน้าเว็บ
-        fetchLinks();
+        fetchCSVData();
     </script>
 </body>
 </html>
