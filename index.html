@@ -39,7 +39,7 @@
                 <h1 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-cubes text-emerald-400"></i> ศูนย์รวมลิงก์และระบบบริหารจัดการไอที
                 </h1>
-                <p class="text-xs text-slate-400 mt-1">ระบบดึงข้อมูลจาก Google Sheets โดยตรงแบบ Real-time คลิกเพื่อเปิดลิงก์ปลายทางในแท็บใหม่</p>
+                <p class="text-xs text-slate-400 mt-1">ระบบดึงข้อมูลจาก Google Sheets ผ่าน Apps Script API ปลอดภัย มั่นคง และ Real-time</p>
             </div>
             <div class="flex flex-wrap gap-2 text-xs">
                 <button onclick="filterCategory('All')" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold border border-cyan-400/30 cursor-pointer transition-all filter-btn" id="btn-all">ทั้งหมด</button>
@@ -52,7 +52,7 @@
         <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div id="loading-view" class="col-span-full text-center py-12">
                 <i class="fa-solid fa-circle-notch text-3xl text-cyan-400 animate-spin mb-3"></i>
-                <p class="text-sm text-slate-400 font-mono">กำลังซิงค์ข้อมูลจาก Google Sheets...</p>
+                <p class="text-sm text-slate-400 font-mono">กำลังซิงค์ข้อมูลผ่าน Google Apps Script API...</p>
             </div>
         </div>
     </main>
@@ -62,70 +62,32 @@
     </footer>
 
     <script>
-        // ไอดีกูเกิลชีตและชื่อแผ่นงาน
-        const SHEET_ID = '1linr5sA7p_huXWymTqjymeJX2fUEfQpJKewTyljS9WM';
-        const SHEET_NAME = 'Links';
-        // ดึงข้อมูลรูปแบบ CSV
-        const FETCH_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+        // เปลี่ยนมาใช้ลิงก์ Web App ของ Google Apps Script ที่ได้จากการ Deploy ล่าสุด (ลงท้ายด้วย /exec)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyDIPls1mPzrcQqteM5PDMTjrR25QNyMOVn8PG1vHvMarUKsZhGU08MK3XaSlHFa1M/exec';
 
         let globalLinks = [];
         let currentFilter = "All";
 
-        // ฟังก์ชันแปลงข้อมูล CSV เป็น Array Object (ปรับปรุงตัวล้างเครื่องหมายคำพูดและช่องว่าง)
-        function parseCSV(csvText) {
-            const lines = csvText.split('\n');
-            const result = [];
-            
-            // วนลูปเริ่มจากแถวที่ 2 (ข้ามหัวตาราง)
-            for (let i = 1; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (!line) continue;
-                
-                // แยกด้วยคอมมา โดยรองรับกรณีข้อความมีเครื่องหมายคำพูดครอบ
-                const tokens = [];
-                let insideQuote = false;
-                let currentToken = '';
-                
-                for (let j = 0; j < line.length; j++) {
-                    let char = line[j];
-                    if (char === '"') {
-                        insideQuote = !insideQuote;
-                    } else if (char === ',' && !insideQuote) {
-                        tokens.push(currentToken.trim());
-                        currentToken = '';
-                    } else {
-                        currentToken += char;
-                    }
-                }
-                tokens.push(currentToken.trim());
-
-                if (tokens.length >= 3) {
-                    // ล้างเครื่องหมายคำพูดที่อาจหลงเหลือหัวท้ายออกให้สะอาด 100%
-                    const name = tokens[0].replace(/^"|"$/g, '').trim();
-                    const category = tokens[1].replace(/^"|"$/g, '').trim();
-                    const url = tokens[2].replace(/^"|"$/g, '').trim();
-                    
-                    if (name && url) {
-                        result.push({ name, category, url });
-                    }
-                }
-            }
-            return result;
-        }
-
-        // ฟังก์ชันหลักในการดึงข้อมูลจาก Google Sheet
+        // ฟังก์ชันหลักในการดึงข้อมูลจาก Google Sheet ผ่าน Apps Script
         async function fetchSheetData() {
             const grid = document.getElementById('frontendGrid');
             const statusBadge = document.getElementById('connection-status');
             
             try {
-                const response = await fetch(FETCH_URL);
+                // เรียกข้อมูลด้วยวิธี GET ไปยัง Apps Script ของพี่โดยตรง
+                const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Network Fail');
                 
-                const csvText = await response.text();
-                globalLinks = parseCSV(csvText);
+                const data = await response.json();
                 
-                // อัปเดตสถานะออนไลน์
+                // ตรวจสอบว่าข้อมูลที่ได้กลับมาส่งค่า error หรือไม่
+                if (data.status === "error") {
+                    throw new Error(data.message);
+                }
+                
+                globalLinks = data;
+                
+                // อัปเดตสถานะออนไลน์สำเร็จ
                 statusBadge.className = "text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5";
                 statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> GOOGLE SHEET ACTIVE`;
                 
@@ -137,15 +99,14 @@
                 grid.innerHTML = `
                     <div class="col-span-full text-center py-12 border border-dashed border-rose-800/40 rounded-2xl bg-rose-500/5">
                         <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-400 mb-2"></i>
-                        <p class="text-rose-300 text-sm font-semibold">เกิดข้อผิดพลาดในการดึงข้อมูล</p>
-                        <p class="text-slate-500 text-xs mt-1">กรุณาตรวจสอบว่าเปิดสิทธิ์การแชร์ Google Sheets เป็น "ทุกคนที่มีลิงก์" แล้วหรือยัง</p>
+                        <p class="text-rose-300 text-sm font-semibold">เกิดข้อผิดพลาดในการดึงข้อมูลจาก Database</p>
+                        <p class="text-slate-500 text-xs mt-1">กรุณาตรวจสอบการตั้งค่าฟังก์ชัน doGet(e) และสถานะ Deployment ใน Apps Script</p>
                     </div>`;
             }
         }
 
         // ฟังก์ชันช่วยจัดสไตล์ตามหมวดหมู่
         function getCategoryStyle(category) {
-            // ล้างช่องว่างและแปลงเป็นพิมพ์เล็กเพื่อเทียบเคียงได้แม่นยำขึ้น
             const cleanCategory = category.trim().toLowerCase();
             switch(cleanCategory) {
                 case 'network': 
@@ -159,18 +120,17 @@
             }
         }
 
-        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บ (ปรับปรุงระบบคัดกรองตัวกรอง)
+        // ฟังก์ชันเรนเดอร์การ์ดรายการระบบไอทีหน้าเว็บ
         function renderFrontend() {
             const grid = document.getElementById('frontendGrid');
             grid.innerHTML = '';
 
-            // ทำความสะอาดและเช็กเงื่อนไขการกรองหมวดหมู่ให้ปลอดภัย
             const filteredData = currentFilter === "All" 
                 ? globalLinks 
                 : globalLinks.filter(item => item.category.trim().toLowerCase() === currentFilter.trim().toLowerCase());
 
             if (filteredData.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ไม่พบรายการระบบในหมวดหมู่นี้ (เพิ่มข้อมูลในแผ่นชีตได้เลย)</p></div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-2xl"><i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i><p class="text-slate-400 text-sm">ไม่พบรายการระบบในหมวดหมู่นี้</p></div>`;
                 return;
             }
 
