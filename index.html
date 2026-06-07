@@ -3,204 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT HUB - Command Center</title>
+    <title>IT HUB | COMMAND CENTER</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Noto Sans Thai', sans-serif; 
-            background-color: #030712; 
-            color: #f3f4f6;
-        }
+        body { font-family: 'Noto Sans Thai', sans-serif; background-color: #060913; color: #f3f4f6; }
         .tech-font { font-family: 'Orbitron', sans-serif; }
-        
-        /* ดีไซน์กล่องนีออน-ไซแอนดั้งเดิมของพี่ช่างโท */
-        .neon-border {
-            border: 1px solid rgba(6, 182, 212, 0.15);
-            background: linear-gradient(145deg, #0f172a, #020617);
+        .neon-box {
+            border: 1px solid rgba(6, 182, 212, 0.1);
+            background: linear-gradient(145deg, #0b1120, #040714);
         }
-        .neon-border:hover {
+        .neon-box:hover {
             border-color: #06b6d4;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
-            transform: translateY(-2px);
-        }
-        .pulse-online {
-            animation: blink 2s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
 
     <div class="max-w-6xl w-full mx-auto">
-        <header class="flex justify-between items-center mb-8 border-b border-cyan-950/40 pb-5">
+        <header class="flex justify-between items-center mb-8 border-b border-slate-900 pb-5">
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2 bg-cyan-950/30 border border-cyan-500/30 px-3 py-1.5 rounded-lg shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-                    <i class="fa-solid fa-terminal text-cyan-400 font-bold text-sm"></i>
-                    <span class="tech-font text-xl font-bold tracking-wider text-white">IT<span class="text-cyan-400">HUB</span></span>
+                <div class="bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded-lg">
+                    <span class="tech-font text-lg font-bold tracking-wider text-white">IT<span class="text-cyan-400">HUB</span></span>
                 </div>
-                <div class="h-6 w-[1px] bg-gray-800 hidden sm:block"></div>
-                <span class="text-xs font-mono text-gray-500 tracking-widest uppercase hidden sm:block">DATA CENTER</span>
+                <span class="text-[10px] tech-font text-gray-500 tracking-widest uppercase hidden sm:block">DATA CENTER</span>
             </div>
             
-            <div class="flex items-center gap-3">
-                <div id="connection-status" class="bg-cyan-950/30 border border-cyan-500/20 px-3 py-1.5 rounded-full flex items-center gap-2">
-                    <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#06b6d4]"></span>
-                    <span id="status-text" class="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider">CONNECTING API...</span>
-                </div>
+            <div class="flex items-center gap-2 text-[10px] tech-font bg-slate-950/60 border border-slate-900 px-3 py-1.5 rounded-full">
+                <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="status-text" class="text-amber-400 font-bold">CONNECTING NODE...</span>
             </div>
         </header>
 
-        <div class="neon-border p-5 rounded-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 relative overflow-hidden">
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-cyan-950/50 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl">
+        <div class="neon-box p-5 rounded-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-cyan-950/30 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl">
                     <i class="fa-solid fa-cubes"></i>
                 </div>
                 <div>
-                    <h2 class="text-base font-bold text-white tracking-wide">ศูนย์รวมลิงก์และระบบบริหารจัดการไอที</h2>
-                    <p class="text-xs text-gray-400 mt-1">ขับเคลื่อนด้วย Google Apps Script REST API รวดเร็วและเสถียร 100%</p>
+                    <h2 class="text-sm font-bold text-white">ศูนย์รวมลิงก์และระบบบริหารจัดการไอที</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">LOCATION NODE: KANCHANADIT (KDHOS)</p>
                 </div>
             </div>
             
-            <div class="flex flex-wrap gap-2 text-xs font-medium">
-                <button onclick="filterCategory('All')" id="btn-all" class="px-4 py-1.5 rounded-lg bg-cyan-400 text-slate-950 font-bold shadow-[0_0_10px_rgba(6,182,212,0.4)] transition-all filter-btn">ทั้งหมด</button>
-                <button onclick="filterCategory('Network')" id="btn-network" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-gray-400 border border-slate-800 transition-all filter-btn">Network & Security</button>
-                <button onclick="filterCategory('Server')" id="btn-server" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-gray-400 border border-slate-800 transition-all filter-btn">Server & Cloud</button>
-                <button onclick="filterCategory('External')" id="btn-external" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-gray-400 border border-slate-800 transition-all filter-btn">เว็บภายนอก / ทั่วไป</button>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <button onclick="filterCat('All')" id="b-all" class="px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab">ทั้งหมด</button>
+                <button onclick="filterCat('Network')" id="b-net" class="px-3 py-1 rounded bg-slate-900 border border-slate-800 text-gray-400 btn-tab">Network</button>
+                <button onclick="filterCat('External')" id="b-ext" class="px-3 py-1 rounded bg-slate-900 border border-slate-800 text-gray-400 btn-tab">External</button>
             </div>
         </div>
 
-        <div id="frontendGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
-            <div class="col-span-full text-center py-20 font-mono text-xs text-gray-600 border border-dashed border-slate-800 rounded-xl">
-                <i class="fa-solid fa-circle-notch animate-spin text-cyan-400 text-lg mb-2"></i><br>
-                FETCHING DATA FROM LIVE API...
+        <div id="linksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+            <div class="col-span-full text-center py-20 text-xs text-gray-500 tech-font">
+                <i class="fa-solid fa-circle-notch animate-spin text-cyan-400 mb-2"></i><br>
+                LOADING REMOTE DATASETS...
             </div>
         </div>
     </div>
 
-    <footer class="text-center text-[10px] text-gray-600 font-mono mt-16 tracking-widest">
-        &copy; 2026 IT HUB SYSTEM COMMAND CENTER. ALL SYSTEMS OPERATIONAL.
+    <footer class="text-center text-[9px] text-gray-600 tech-font tracking-widest mt-10">
+        IT HUB REPLICATION MANAGER // SYNC OPERATIONAL.
     </footer>
 
     <script>
-        // ⚠️ พี่ช่างโทก๊อปปี้ลิงก์ "เว็บแอป" (Web App URL) ที่ได้จาก Apps Script มาวางแทนที่ตรงนี้ครับ
-        const API_URL = "https://script.google.com/macros/s/xxxxxxxxx/exec"; 
+        // ⚠️ เอาลิงก์ Web App (จากในเบราว์เซอร์รูปที่ 2 หรือ 3 ของพี่) มาวางใส่ในเครื่องหมายคำพูดตรงนี้ได้เลยครับ
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxr3iSsmxnTd1W0h50vdD1Uy8NW7jGFt2V2TUbfr2AAgHRcL1Duf-sR6hpTCsEkHpOZ/exec";
 
-        let globalLinks = [];
-        let currentFilter = "All";
+        let rawData = [];
 
-        // ฟังก์ชันดึงข้อมูลข้ามโดเมนจาก Google Sheets มาโชว์บน GitHub Pages
-        async function loadDataFromAPI() {
+        async function fetchData() {
             const dot = document.getElementById('status-dot');
             const txt = document.getElementById('status-text');
             
             try {
-                // ยิงไปขอข้อมูลจากฟังก์ชัน getSheetData ที่ฝั่ง Apps Script ผ่านวิธี Fetch
-                const response = await fetch(`${API_URL}?action=get`);
-                const result = await response.json();
+                // ยิงดึงข้อมูลข้าม Domain ด้วยวิธีแนบ Action Request
+                const res = await fetch(`${WEB_APP_URL}?action=get`);
+                const json = await res.json();
                 
-                if (result.status === "success") {
-                    dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]";
-                    txt.innerText = "● SYSTEM ONLINE";
-                    txt.className = "text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider";
+                if(json.status === "success") {
+                    dot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
+                    txt.innerText = "ONLINE SYNCED";
+                    txt.className = "text-emerald-400 font-bold";
                     
-                    globalLinks = result.data;
-                    renderFrontend();
+                    rawData = json.data;
+                    renderCards('All');
                 } else {
-                    showErrorState(result.message);
+                    throw new Error("Data Error");
                 }
-            } catch (err) {
-                showErrorState("CORS Blocked หรือ URL ไม่ถูกต้อง");
+            } catch (e) {
+                dot.className = "w-2 h-2 rounded-full bg-rose-500";
+                txt.innerText = "DESYNCHRONIZED (CORS)";
+                txt.className = "text-rose-400 font-bold";
+                document.getElementById('linksGrid').innerHTML = `
+                    <div class="col-span-full p-4 border border-rose-950 bg-rose-950/20 text-rose-400 text-xs text-center rounded-lg">
+                        [CRITICAL ERROR] ไม่สามารถดึงข้อมูลได้ดั่งเดิมภายนอกระบบ Apps Script กรุณาตรวจสอบสิทธิ์ Deployment (ต้องเลือก Anyone)
+                    </div>`;
             }
         }
 
-        function showErrorState(msg) {
-            const dot = document.getElementById('status-dot');
-            const txt = document.getElementById('status-text');
-            dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500 pulse-online";
-            txt.innerText = "● API DISCONNECTED";
-            txt.className = "text-[10px] font-mono text-rose-400 font-bold uppercase tracking-wider";
-            
-            document.getElementById('frontendGrid').innerHTML = `
-                <div class="col-span-full p-5 text-center border border-rose-950/40 bg-rose-950/10 text-rose-400 rounded-xl font-mono text-xs">
-                    [FETCH_FAILED] ไม่สามารถดึงข้อมูลผ่าน API ได้: ${msg}
-                </div>`;
-        }
-
-        function getCategoryStyle(category) {
-            const cleanCategory = category.trim().toLowerCase();
-            if (cleanCategory.includes('net') || cleanCategory.includes('sec')) {
-                return { icon: 'fa-network-wired', badgeText: 'NETWORK & SECURITY', badgeColor: 'text-cyan-400 bg-cyan-950/30 border-cyan-900/40' };
-            } else if (cleanCategory.includes('serv') || cleanCategory.includes('cloud')) {
-                return { icon: 'fa-server', badgeText: 'SERVER & CLOUD', badgeColor: 'text-cyan-400 bg-cyan-950/30 border-cyan-900/40' };
-            } else {
-                return { icon: 'fa-globe', badgeText: 'EXTERNAL WEBSITE', badgeColor: 'text-pink-500 bg-pink-950/30 border-pink-900/40' };
-            }
-        }
-
-        function renderFrontend() {
-            const grid = document.getElementById('frontendGrid');
+        function renderCards(filter) {
+            const grid = document.getElementById('linksGrid');
             grid.innerHTML = '';
+            
+            let filtered = filter === 'All' ? rawData : rawData.filter(d => d.category.toLowerCase().includes(filter.toLowerCase().substring(0,3)));
+            
+            filtered.forEach(item => {
+                const isLocal = /^(192\.168|172\.|10\.|localhost)/.test(item.url.replace(/(^\w+:|^)\/\//, ''));
+                const scopeBadge = isLocal 
+                    ? `<span class="text-[9px] border border-amber-900 bg-amber-950/30 text-amber-500 px-1.5 py-0.5 rounded font-bold">INTERNAL LAN</span>`
+                    : `<span class="text-[9px] border border-blue-900 bg-blue-950/30 text-blue-400 px-1.5 py-0.5 rounded font-bold">PUBLIC URL</span>`;
 
-            const filteredData = currentFilter === "All" 
-                ? globalLinks 
-                : globalLinks.filter(item => item.category.trim().toLowerCase().includes(currentFilter.toLowerCase().substring(0,3)));
-
-            if (filteredData.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-xl text-gray-500 font-mono text-xs">ไม่พบรายการบันทึกข้อมูลในหมวดหมู่นี้</div>`;
-                return;
-            }
-
-            filteredData.forEach(item => {
-                const style = getCategoryStyle(item.category);
-                const isLocalIP = /^(https?:\/\/)?(127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|10\.)/i.test(item.url);
-                const scopeBadge = isLocalIP 
-                    ? `<span class="border border-amber-900/40 px-1.5 py-0.5 rounded text-amber-500 bg-amber-950/40">INTERNAL LAN</span>`
-                    : `<span class="border border-blue-900/40 px-1.5 py-0.5 rounded text-blue-400 bg-blue-950/40">PUBLIC URL</span>`;
+                const icon = item.category.toLowerCase().includes('net') ? 'fa-network-wired' : 'fa-globe';
 
                 grid.insertAdjacentHTML('beforeend', `
-                    <a href="${item.url}" target="_blank" class="neon-border p-4 rounded-xl flex flex-col justify-between group transition-all duration-200">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-all">
-                                <i class="fa-solid ${style.icon} text-sm"></i>
+                    <a href="${item.url}" target="_blank" class="neon-box p-4 rounded-xl flex flex-col justify-between group transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-all">
+                                <i class="fa-solid ${icon} text-xs"></i>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[9px] font-mono font-bold tracking-wider uppercase">
-                                <span class="border px-2 py-0.5 rounded ${style.badgeColor}">${style.badgeText}</span>
-                                ${scopeBadge}
-                            </div>
+                            ${scopeBadge}
                         </div>
                         <div>
-                            <h3 class="text-xs font-bold text-gray-200 group-hover:text-cyan-400 transition-colors mb-1.5 truncate">
-                                ${item.name}
-                            </h3>
-                            <div class="flex items-center gap-1.5 text-[11px] font-mono text-gray-500 group-hover:text-gray-400 transition-colors">
-                                <i class="fa-solid fa-link text-[9px]"></i>
-                                <span class="truncate">${item.url}</span>
-                            </div>
+                            <h3 class="text-xs font-bold text-gray-200 group-hover:text-cyan-400 transition-colors truncate mb-1">${item.name}</h3>
+                            <p class="text-[10px] text-gray-500 truncate font-mono">${item.url}</p>
                         </div>
-                    </a>`);
+                    </a>
+                `);
             });
         }
 
-        function filterCategory(category) {
-            currentFilter = category;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.className = "px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-gray-400 border border-slate-800 transition-all filter-btn";
+        function filterCat(cat) {
+            document.querySelectorAll('.btn-tab').forEach(b => {
+                b.className = "px-3 py-1 rounded bg-slate-900 border border-slate-800 text-gray-400 btn-tab";
             });
-
-            const btnId = category === 'All' ? 'btn-all' : 'btn-' + category.toLowerCase();
-            const activeBtn = document.getElementById(btnId);
-            if (activeBtn) {
-                activeBtn.className = "px-4 py-1.5 rounded-lg bg-cyan-400 text-slate-950 font-bold shadow-[0_0_10px_rgba(6,182,212,0.4)] transition-all filter-btn";
-            }
-            renderFrontend();
+            if(cat === 'All') document.getElementById('b-all').className = "px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab";
+            if(cat === 'Network') document.getElementById('b-net').className = "px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab";
+            if(cat === 'External') document.getElementById('b-ext').className = "px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab";
+            renderCards(cat);
         }
 
-        window.addEventListener('load', loadDataFromAPI);
+        window.onload = fetchData;
     </script>
 </body>
 </html>
