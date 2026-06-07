@@ -4,28 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT HUB | COMMAND CENTER</title>
+    <!-- Tailwind CSS v4 & Font Awesome Icons -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Noto Sans Thai', sans-serif; background-color: #060913; color: #f3f4f6; }
         .tech-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* แกะดีไซน์กล่องนีออน-ไซแอนดั้งเดิมของพี่ช่างโท */
         .neon-box {
-            border: 1px solid rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.15);
             background: linear-gradient(145deg, #0b1120, #040714);
         }
         .neon-box:hover {
             border-color: #06b6d4;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+            transform: translateY(-2px);
+        }
+        .pulse-online {
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 100’% { opacity: 0.4; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
 
     <div class="max-w-6xl w-full mx-auto">
-        <header class="flex justify-between items-center mb-8 border-b border-slate-900 pb-5">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 border-b border-slate-900/60 pb-5">
             <div class="flex items-center gap-3">
-                <div class="bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded-lg">
+                <div class="bg-cyan-950/40 border border-cyan-500/30 px-3 py-1.5 rounded-lg shadow-[0_0_10px_rgba(6,182,212,0.15)]">
                     <span class="tech-font text-lg font-bold tracking-wider text-white">IT<span class="text-cyan-400">HUB</span></span>
                 </div>
                 <span class="text-[10px] tech-font text-gray-500 tracking-widest uppercase hidden sm:block">DATA CENTER</span>
@@ -37,110 +49,151 @@
             </div>
         </header>
 
-        <div class="neon-box p-5 rounded-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <!-- Main Banner -->
+        <div class="neon-box p-5 rounded-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 relative overflow-hidden">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-cyan-950/30 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl">
                     <i class="fa-solid fa-cubes"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-white">ศูนย์รวมลิงก์และระบบบริหารจัดการไอที</h2>
+                    <h2 class="text-sm font-bold text-white tracking-wide">ศูนย์รวมลิงก์และระบบบริหารจัดการไอที</h2>
                     <p class="text-xs text-gray-400 mt-0.5">LOCATION NODE: KANCHANADIT (KDHOS)</p>
                 </div>
             </div>
             
-            <div class="flex flex-wrap gap-2 text-xs">
-                <button onclick="filterCat('All')" id="b-all" class="px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab">ทั้งหมด</button>
-                <button onclick="filterCat('Network')" id="b-net" class="px-3 py-1 rounded bg-slate-900 border border-slate-800 text-gray-400 btn-tab">Network</button>
-                <button onclick="filterCat('External')" id="b-ext" class="px-3 py-1 rounded bg-slate-900 border border-slate-800 text-gray-400 btn-tab">External</button>
+            <!-- ปุ่มคัดกรองหมวดหมู่ที่ใช้กรองการ์ดได้จริง -->
+            <div class="flex flex-wrap gap-2 text-xs font-medium">
+                <button onclick="filterCat('All')" id="b-all" class="px-4 py-1.5 rounded bg-cyan-400 text-slate-950 font-bold transition-all shadow-[0_0_10px_rgba(6,182,212,0.3)] btn-tab">ทั้งหมด</button>
+                <button onclick="filterCat('Network')" id="b-net" class="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-gray-400 hover:text-white transition-all btn-tab">Network & Security</button>
+                <button onclick="filterCat('Server')" id="b-srv" class="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-gray-400 hover:text-white transition-all btn-tab">Server & Cloud</button>
+                <button onclick="filterCat('External')" id="b-ext" class="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-gray-400 hover:text-white transition-all btn-tab">เว็บภายนอก / ทั่วไป</button>
             </div>
         </div>
 
+        <!-- Grid Container โซนแสดงแผงการ์ดข้อมูลไอที -->
         <div id="linksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-            <div class="col-span-full text-center py-20 text-xs text-gray-500 tech-font">
-                <i class="fa-solid fa-circle-notch animate-spin text-cyan-400 mb-2"></i><br>
-                LOADING REMOTE DATASETS...
+            <div class="col-span-full text-center py-20 text-xs text-gray-500 tech-font border border-dashed border-slate-900 rounded-xl">
+                <i class="fa-solid fa-circle-notch animate-spin text-cyan-400 mb-2 text-lg"></i><br>
+                FETCHING LIVE REPLICATION DATASETS...
             </div>
         </div>
     </div>
 
-    <footer class="text-center text-[9px] text-gray-600 tech-font tracking-widest mt-10">
-        IT HUB REPLICATION MANAGER // SYNC OPERATIONAL.
+    <!-- ส่วนท้ายหน้าจอ คลีนๆ สไตล์ช่างโท -->
+    <footer class="text-center text-[9px] text-gray-600 tech-font tracking-widest mt-16">
+        IT HUB REPLICATION MANAGER V2.6 // NODE_STATUS: OPERATIONAL
     </footer>
 
+    <!-- ================= ENGINE SCRIPT ZONE ================= -->
     <script>
-        // ⚠️ เอาลิงก์ Web App (จากในเบราว์เซอร์รูปที่ 2 หรือ 3 ของพี่) มาวางใส่ในเครื่องหมายคำพูดตรงนี้ได้เลยครับ
+        // ⚠️ ลิงก์ Web App ที่มาจากฝั่ง Google Apps Script ของพี่ช่างโทครับ
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxr3iSsmxnTd1W0h50vdD1Uy8NW7jGFt2V2TUbfr2AAgHRcL1Duf-sR6hpTCsEkHpOZ/exec";
 
         let rawData = [];
+        let currentFilter = "All";
 
+        // ฟังก์ชันเชื่อมต่อรับอาเรย์ชุดข้อมูลดิบจาก API (รองรับข้อมูลที่พ่นแบบ Array ไม่ต้องแกะ .data)
         async function fetchData() {
             const dot = document.getElementById('status-dot');
             const txt = document.getElementById('status-text');
             
             try {
-                // ยิงดึงข้อมูลข้าม Domain ด้วยวิธีแนบ Action Request
                 const res = await fetch(`${WEB_APP_URL}?action=get`);
                 const json = await res.json();
                 
-                if(json.status === "success") {
+                // ปรับจูนตรวจสอบโครงสร้าง: รองรับข้อมูลอาเรย์โดยตรงตามภาพ JSON ของพี่ช่างโท
+                let fetchedLinks = [];
+                if (Array.isArray(json)) {
+                    fetchedLinks = json;
+                } else if (json && json.status === "success" && Array.isArray(json.data)) {
+                    fetchedLinks = json.data;
+                } else if (json && Array.isArray(json.data)) {
+                    fetchedLinks = json.data;
+                }
+
+                if (fetchedLinks.length > 0) {
                     dot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
                     txt.innerText = "ONLINE SYNCED";
                     txt.className = "text-emerald-400 font-bold";
                     
-                    rawData = json.data;
+                    rawData = fetchedLinks;
                     renderCards('All');
                 } else {
-                    throw new Error("Data Error");
+                    throw new Error("Empty dataset or invalid structure");
                 }
             } catch (e) {
-                dot.className = "w-2 h-2 rounded-full bg-rose-500";
+                dot.className = "w-2 h-2 rounded-full bg-rose-500 pulse-online";
                 txt.innerText = "DESYNCHRONIZED (CORS)";
                 txt.className = "text-rose-400 font-bold";
                 document.getElementById('linksGrid').innerHTML = `
-                    <div class="col-span-full p-4 border border-rose-950 bg-rose-950/20 text-rose-400 text-xs text-center rounded-lg">
-                        [CRITICAL ERROR] ไม่สามารถดึงข้อมูลได้ดั่งเดิมภายนอกระบบ Apps Script กรุณาตรวจสอบสิทธิ์ Deployment (ต้องเลือก Anyone)
+                    <div class="col-span-full p-4 border border-rose-950 bg-rose-950/20 text-rose-400 text-xs text-center rounded-lg font-mono">
+                        [CRITICAL ERROR] ไม่สามารถถ่ายโอนชุดข้อมูลข้ามโดเมนได้ กรุณาตรวจสอบการเข้าถึงสคริปต์ปลายทาง (ต้องตั้งเป็น Anyone)
                     </div>`;
             }
         }
 
+        // ฟังชันคัดกรองไอคอนและเรนเดอร์กล่องการ์ด
         function renderCards(filter) {
             const grid = document.getElementById('linksGrid');
             grid.innerHTML = '';
             
-            let filtered = filter === 'All' ? rawData : rawData.filter(d => d.category.toLowerCase().includes(filter.toLowerCase().substring(0,3)));
+            let filtered = filter === 'All' 
+                ? rawData 
+                : rawData.filter(d => (d.category || '').toLowerCase().includes(filter.toLowerCase().substring(0,3)));
             
-            filtered.forEach(item => {
-                const isLocal = /^(192\.168|172\.|10\.|localhost)/.test(item.url.replace(/(^\w+:|^)\/\//, ''));
-                const scopeBadge = isLocal 
-                    ? `<span class="text-[9px] border border-amber-900 bg-amber-950/30 text-amber-500 px-1.5 py-0.5 rounded font-bold">INTERNAL LAN</span>`
-                    : `<span class="text-[9px] border border-blue-900 bg-blue-950/30 text-blue-400 px-1.5 py-0.5 rounded font-bold">PUBLIC URL</span>`;
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 text-xs font-mono border border-dashed border-slate-900 rounded-xl">ไม่พบรายการระบบงานไอทีในหมวดหมู่นี้</div>`;
+                return;
+            }
 
-                const icon = item.category.toLowerCase().includes('net') ? 'fa-network-wired' : 'fa-globe';
+            filtered.forEach(item => {
+                const urlString = item.url || '';
+                const nameString = item.name || 'ไม่ได้ระบุชื่อ';
+                const catString = (item.category || 'External').toLowerCase();
+
+                // ตรวจสอบสถานะ LAN IP เครือข่ายภายใน กับลิงก์อินเทอร์เน็ต WAN ภายนอก
+                const isLocal = /^(192\.168|172\.|10\.|localhost|127\.)/.test(urlString.replace(/(^\w+:|^)\/\//, ''));
+                const scopeBadge = isLocal 
+                    ? `<span class="text-[9px] border border-amber-900/50 bg-amber-950/40 text-amber-500 px-1.5 py-0.5 rounded font-bold font-mono">INTERNAL LAN</span>`
+                    : `<span class="text-[9px] border border-blue-900/50 bg-blue-950/40 text-blue-400 px-1.5 py-0.5 rounded font-bold font-mono">PUBLIC URL</span>`;
+
+                // สลับไอคอนแยกประเภทตามหมวดหมู่
+                let icon = 'fa-globe';
+                if (catString.includes('net') || catString.includes('sec')) icon = 'fa-network-wired';
+                if (catString.includes('ser') || catString.includes('clo')) icon = 'fa-server';
 
                 grid.insertAdjacentHTML('beforeend', `
-                    <a href="${item.url}" target="_blank" class="neon-box p-4 rounded-xl flex flex-col justify-between group transition-all">
-                        <div class="flex justify-between items-start mb-3">
+                    <a href="${urlString}" target="_blank" class="neon-box p-4 rounded-xl flex flex-col justify-between group transition-all duration-200">
+                        <div class="flex justify-between items-start mb-4">
                             <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-all">
                                 <i class="fa-solid ${icon} text-xs"></i>
                             </div>
                             ${scopeBadge}
                         </div>
                         <div>
-                            <h3 class="text-xs font-bold text-gray-200 group-hover:text-cyan-400 transition-colors truncate mb-1">${item.name}</h3>
-                            <p class="text-[10px] text-gray-500 truncate font-mono">${item.url}</p>
+                            <h3 class="text-xs font-bold text-gray-200 group-hover:text-cyan-400 transition-colors truncate mb-1.5">${nameString}</h3>
+                            <div class="flex items-center gap-1.5 text-[10px] text-gray-500 font-mono group-hover:text-gray-400 transition-colors">
+                                <i class="fa-solid fa-link text-[8px]"></i>
+                                <span class="truncate">${urlString}</span>
+                            </div>
                         </div>
                     </a>
                 `);
             });
         }
 
+        // ฟังก์ชันสลับคลาสของแท็บปุ่มกรองหน้าระบบ
         function filterCat(cat) {
+            currentFilter = cat;
             document.querySelectorAll('.btn-tab').forEach(b => {
-                b.className = "px-3 py-1 rounded bg-slate-900 border border-slate-800 text-gray-400 btn-tab";
+                b.className = "px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-gray-400 hover:text-white transition-all btn-tab";
             });
-            if(cat === 'All') document.getElementById('b-all').className = "px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab";
-            if(cat === 'Network') document.getElementById('b-net').className = "px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab";
-            if(cat === 'External') document.getElementById('b-ext').className = "px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold btn-tab";
+            
+            if(cat === 'All') document.getElementById('b-all').className = "px-4 py-1.5 rounded bg-cyan-400 text-slate-950 font-bold transition-all shadow-[0_0_10px_rgba(6,182,212,0.3)] btn-tab";
+            if(cat === 'Network') document.getElementById('b-net').className = "px-4 py-1.5 rounded bg-cyan-400 text-slate-950 font-bold transition-all shadow-[0_0_10px_rgba(6,182,212,0.3)] btn-tab";
+            if(cat === 'Server') document.getElementById('b-srv').className = "px-4 py-1.5 rounded bg-cyan-400 text-slate-950 font-bold transition-all shadow-[0_0_10px_rgba(6,182,212,0.3)] btn-tab";
+            if(cat === 'External') document.getElementById('b-ext').className = "px-4 py-1.5 rounded bg-cyan-400 text-slate-950 font-bold transition-all shadow-[0_0_10px_rgba(6,182,212,0.3)] btn-tab";
+            
             renderCards(cat);
         }
 
